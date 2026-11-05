@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>¡Reto de verbos!</title>
+<style>
+:root{font-family:Arial,Helvetica,sans-serif;color:#17213c;background:#f5f3eb}
+*{box-sizing:border-box}
+body{margin:0}
+button,select,input{font:inherit}
+button{cursor:pointer;border:2px solid #d6d9e4;border-radius:14px;background:white;color:#17213c;padding:12px 18px;font-weight:700;min-height:48px}
+button:hover:not(:disabled){border-color:#5442c8;background:#f0edff}
+button:disabled{cursor:default;opacity:.55}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:4px solid #246bd4;outline-offset:3px}
+.primary{background:#4935ac;color:white;border-color:#4935ac}
+.primary:hover:not(:disabled){background:#352481;color:white}
+header{background:#ffcb57;padding:20px 28px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;border-bottom:3px solid #17213c}
+h1{font-size:clamp(25px,4vw,44px);margin:0;letter-spacing:-1px}
+.sub{margin:6px 0 0;font-size:16px}
+.tools,.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+main{max-width:1200px;margin:auto;padding:24px}
+.panel{background:white;border:2px solid #dce0e8;border-radius:24px;padding:28px}
+h2{margin:0 0 12px;font-size:30px}
+p{line-height:1.5}
+.lead{font-size:20px;margin-top:0}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+label.field{display:flex;flex-direction:column;gap:8px;font-weight:700}
+select,input[type=text]{width:100%;padding:13px;border:2px solid #cbd0dc;border-radius:10px;background:white;color:#17213c}
+fieldset{border:0;padding:0;margin:0}
+legend{font-weight:700;margin-bottom:12px}
+.verbs{display:flex;flex-wrap:wrap;gap:10px}
+.chip{display:flex;gap:8px;align-items:center;background:#f0edff;border-radius:12px;padding:14px;font-size:20px;font-weight:700}
+input[type=checkbox]{width:20px;height:20px;accent-color:#4935ac}
+.hint{color:#4a5470;font-size:16px}
+.start{font-size:24px;padding:17px 30px}
+.bottom{margin-top:24px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+.scoreboard{display:grid;grid-template-columns:repeat(var(--teams,2),1fr);gap:12px;margin-bottom:18px}
+.team{border:3px solid #dce0e8;background:white;border-radius:18px;padding:14px;text-align:center}
+.team.active{border-color:#4935ac;background:#eeebff}
+.team-name{font-size:clamp(16px,2vw,22px);font-weight:700;overflow-wrap:anywhere}
+.points{font-size:36px;font-weight:800;margin:5px}
+.turn-label{font-size:13px;min-height:16px;text-transform:uppercase;letter-spacing:1px}
+.meta{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;color:#4a5470;font-weight:700;margin-bottom:14px}
+.badge{background:#eeeaff;color:#4935ac;border-radius:30px;padding:9px 16px}
+.question{text-align:center;margin:26px 0;font-size:clamp(32px,5.2vw,64px);line-height:1.22;font-weight:800}
+.blank{color:#4935ac;white-space:nowrap}
+.options{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.option{text-align:left;display:flex;align-items:center;gap:15px;padding:20px;font-size:clamp(24px,3.5vw,38px);border:3px solid #dce0e8;overflow-wrap:anywhere}
+.letter{font-size:20px;flex-shrink:0;background:#edf0f5;border-radius:10px;padding:9px 13px}
+.option.correct{background:#e1f5e8;border-color:#237541;color:#17542c;opacity:1}
+.option.wrong{background:#ffebe7;border-color:#b03e2c;color:#852b1c;opacity:1}
+.feedback{margin-top:20px;border-radius:14px;background:#f0edff;padding:18px;text-align:center;font-size:clamp(21px,2.6vw,30px);line-height:1.4}
+.feedback:empty{display:none}
+.answer{color:#4935ac;font-weight:800}
+.progress{height:9px;background:#dde0ea;border-radius:20px;overflow:hidden;margin-bottom:22px}
+.progress div{height:100%;background:#4935ac;transition:width .2s}
+.center{text-align:center}
+.manual{display:flex;justify-content:center;gap:14px;flex-wrap:wrap;margin:20px 0}
+.manual button{font-size:23px}
+.clock{font-variant-numeric:tabular-nums}
+.note{min-height:22px;font-size:15px}
+dialog{border:0;border-radius:20px;max-width:1100px;width:95%;max-height:90vh;padding:25px;color:#17213c}
+dialog::backdrop{background:#17213c99}
+.table-wrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:clamp(17px,2vw,23px);margin:20px 0}
+th,td{text-align:left;padding:14px 12px;border-bottom:1px solid #dce0e8;white-space:nowrap}
+th{background:#f0edff;color:#4935ac}
+td:first-child{font-weight:700}
+[hidden]{display:none!important}
+.trophy{font-size:64px;margin:12px}
+.name-fields{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px}
+@media(max-width:650px){main{padding:14px}.panel{padding:19px}.grid{grid-template-columns:1fr}.options{grid-template-columns:1fr}.option{padding:14px}header{padding:18px}.scoreboard{grid-template-columns:repeat(2,1fr)}.question{margin:24px 0}.name-fields{grid-template-columns:1fr}.points{font-size:28px}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header>
+<div><h1>¡Reto de verbos! ⚡</h1><p class="sub">ESPAÑOL 1A · SEXTO · Piensa, conversa, ¡conjuga!</p></div>
+<div class="tools">
+<button id="review">📖 Repaso</button>
+<button id="fullscreen">⛶ Pantalla completa</button>
+</div>
+</header>
+<main>
+<section id="setup" class="panel">
+<h2>¡La clase entra en juego!</h2>
+<p class="lead">Formen equipos. Hablen antes de responder. ¡Cada acierto vale 100 puntos!</p>
+<div class="grid">
+<fieldset>
+<legend>1. Elige los verbos</legend>
+<div class="verbs" id="verbChecks"></div>
+<p class="hint">Selecciona uno para practicar o combina varios para un reto mixto.</p>
+<label class="chip" style="font-size:17px;background:#f5f3eb"><input type="checkbox" id="vos"> Incluir vosotros/as</label>
+</fieldset>
+<div class="grid" style="gap:15px">
+<label class="field">2. Modo de juego<select id="mode"><option value="choice">🎯 Elige la respuesta</option><option value="oral">💬 Conjuga y revela</option></select></label>
+<label class="field">3. Equipos<select id="teamCount"><option value="1">Toda la clase</option><option value="2" selected>2 equipos</option><option value="3">3 equipos</option><option value="4">4 equipos</option></select></label>
+<label class="field">4. Preguntas<select id="length"><option>10</option><option selected>15</option><option>20</option><option>30</option></select></label>
+<label class="field">5. Tiempo por turno<select id="time"><option value="0">Sin reloj</option><option value="15">15 segundos</option><option value="30">30 segundos</option><option value="45">45 segundos</option></select></label>
+</div>
+</div>
+<div class="name-fields" id="names"></div>
+<div class="bottom">
+<p class="hint">Un equipo por turno · Sin penalización por errores<br>En «Conjuga y revela», la profesora marca el resultado.</p>
+<button class="primary start" id="start">¡A jugar! →</button>
+</div>
+<p id="setupError" role="alert"></p>
+</section>
+
+<section id="game" hidden>
+<div class="scoreboard" id="scores"></div>
+<div class="panel">
+<div class="meta"><span id="round"></span><span class="badge" id="verbTag"></span><div class="row"><span class="clock" id="clock"></span><button id="pause" hidden>Pausar reloj</button></div></div>
+<div class="progress"><div id="bar"></div></div>
+<p class="center hint" id="instruction">Conversa con tu equipo y elige la forma correcta.</p>
+<div class="question" id="question"></div>
+<div class="options" id="options"></div>
+<div class="manual" id="revealArea" hidden><button class="primary" id="reveal">Revelar respuesta</button></div>
+<div id="feedback" class="feedback" aria-live="polite"></div>
+<div class="manual" id="judge" hidden><button id="right">✓ ¡Correcto! +100</button><button id="wrong">Todavía no · 0 puntos</button></div>
+<div class="bottom"><button id="exit">Terminar partida</button><button class="primary" id="next" disabled>Siguiente turno →</button></div>
+</div>
+<p class="hint center">Profesora: selecciona una respuesta o usa las teclas 1–4. Pulsa Enter para avanzar después de corregir.</p>
+</section>
+
+<section id="results" class="panel center" hidden>
+<div class="trophy">🏆</div><h2 id="resultTitle"></h2>
+<p class="lead" id="summary"></p>
+<div id="finalScores" class="scoreboard"></div>
+<p class="hint">Cada intento cuenta. ¡Sigan practicando!</p>
+<div class="row" style="justify-content:center"><button id="again" class="primary">Revancha ↻</button><button id="settings">Cambiar opciones</button></div>
+</section>
+<p id="systemNote" class="note" aria-live="polite"></p>
+</main>
+
+<dialog id="reviewDialog">
+<div class="row" style="justify-content:space-between"><h2>📖 Nuestro mapa de verbos</h2><button id="closeReview">Cerrar ✕</button></div>
+<p>El <strong>infinitivo</strong> es el nombre del verbo. <strong>Conjugar</strong> es cambiar su forma para que corresponda al sujeto: hablar → yo hablo.</p>
+<div class="table-wrap"><table><thead><tr><th>Sujeto</th><th>llamarse</th><th>ser</th><th>tener</th><th>vivir</th><th>hablar</th></tr></thead><tbody id="chart"></tbody></table></div>
+<p><strong>Llamarse necesita una palabra compañera:</strong> <strong>me</strong> llamo, <strong>te</strong> llamas, <strong>se</strong> llama, <strong>nos</strong> llamamos, <strong>os</strong> llamáis, <strong>se</strong> llaman. ¡No la olvides!</p>
+<p><strong>Yo</strong> → hablo · <strong>Lucía</strong> → ella → habla · <strong>Diego y yo</strong> → nosotros → hablamos · <strong>Tú y Ana</strong> → ustedes → hablan (en Latinoamérica).</p>
+<p class="hint">Significados: llamarse = to be called · ser = to be · tener = to have · vivir = to live · hablar = to speak.</p>
+</dialog>
+
+<dialog id="exitDialog">
+<h2>¿Terminar esta partida?</h2><p>Verás los puntos ganados hasta ahora.</p>
+<div class="row"><button id="cancelExit">Seguir jugando</button><button class="primary" id="confirmExit">Ver resultados</button></div>
+</dialog>
+<script>
+(function(){
+'use strict';
+const $=id=>document.getElementById(id);
+const forms={
+llamarse:['me llamo','te llamas','se llama','nos llamamos','os llamáis','se llaman'],
+ser:['soy','eres','es','somos','sois','son'],
+tener:['tengo','tienes','tiene','tenemos','tenéis','tienen'],
+vivir:['vivo','vives','vive','vivimos','vivís','viven'],
+hablar:['hablo','hablas','habla','hablamos','habláis','hablan']
+};
+const pronouns=['yo','tú','él / ella / usted','nosotros/as','vosotros/as','ellos / ellas / ustedes'];
+const subjects=[
+['Yo'],
+['Tú'],
+['Ella','Él','Usted','Lucía','Diego','Mi amiga','El profesor'],
+['Nosotros','Nosotras','Diego y yo','Ana y yo','Mi amigo y yo'],
+['Vosotros','Vosotras'],
+['Ellos','Ellas','Ustedes','Lucía y Diego','Mis amigos','Tú y Ana']
+];
+const meanings={llamarse:'to be called',ser:'to be',tener:'to have',vivir:'to live',hablar:'to speak'};
+const colors=['#4935ac','#176479','#9c3e19','#24663d'];
+let config=null,deck=[],index=0,teams=[],answered=false,revealed=false,correctCount=0,attempts=0;
+let interval=null,remaining=0,paused=false,reviewPaused=false,exitPaused=false;
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function pick(a){return a[Math.floor(Math.random()*a.length)];}
+function text(tag,value,className){const n=document.createElement(tag);n.textContent=value;if(className)n.className=className;return n;}
+Object.keys(forms).forEach(v=>{
+const label=document.createElement('label');label.className='chip';
+const box=document.createElement('input');box.type='checkbox';box.value=v;box.checked=true;
+label.append(box,document.createTextNode(v));$('verbChecks').append(label);
+});
+function names(){
+const old=[...$('names').querySelectorAll('input')].map(x=>x.value);
+$('names').replaceChildren();
+for(let i=0;i<Number($('teamCount').value);i++){
+const l=document.createElement('label');l.className='field';l.textContent='Nombre del equipo '+(i+1);
+const n=document.createElement('input');n.type='text';n.maxLength=24;
+n.value=old[i]||(['Los Relámpagos','Los Cometas','Los Tigres','Los Dragones'][i]);
+if($('teamCount').value==='1'&&!old[i])n.value='¡Toda la clase!';
+l.append(n);$('names').append(l);
+}}
+$('teamCount').onchange=names;names();
+function show(id){['setup','game','results'].forEach(x=>$(x).hidden=x!==id);}
+function stopClock(){clearInterval(interval);interval=null;}
+function clockDisplay(){
+$('clock').textContent=config&&config.time?(remaining===0?'⏰ ¡Tiempo!':'⏱ '+remaining+' s'):'Sin reloj';
+$('pause').hidden=!config||!config.time||answered||revealed||remaining===0;
+$('pause').textContent=paused?'Continuar reloj':'Pausar reloj';
+}
+function runClock(){
+stopClock();clockDisplay();
+if(!config.time||paused||answered||revealed||remaining===0)return;
+interval=setInterval(()=>{
+remaining--;clockDisplay();
+if(remaining<=0){stopClock();$('instruction').textContent='¡Tiempo! Den su respuesta. La profesora puede continuar sin penalización.';}
+},1000);
+}
+$('pause').onclick=()=>{paused=!paused;runClock();};
+function buildDeck(){
+const rows=config.vos?[0,1,2,3,4,5]:[0,1,2,3,5];
+const pairs=[];config.verbs.forEach(v=>rows.forEach(r=>pairs.push({v,r})));
+let pool=[];
+while(pool.length<config.count)pool.push(...shuffle(pairs.map(x=>({...x}))));
+return pool.slice(0,config.count).map(({v,r})=>{
+const s=pick(subjects[r]);let ending='';
+if(v==='llamarse'){
+ending=r===3||r===4||r===5?'Alex y Dani.':pick(['Alex.','Dani.','Sam.']);
+}else if(v==='ser')ending=(r===3||r===4||r===5)?'estudiantes.':'estudiante.';
+else if(v==='tener')ending=pick(['un libro.','una mochila.','doce años.','una pregunta.']);
+else if(v==='vivir')ending=pick(['en Los Ángeles.','en California.','en México.','en una casa.']);
+else ending=pick(['español.','inglés.','francés.','dos idiomas.']);
+const answer=forms[v][r];
+let distractors=shuffle([...new Set(forms[v].filter((_,i)=>config.vos||i!==4))].filter(x=>x!==answer)).slice(0,3);
+return {v,r,s,ending,answer,choices:shuffle([answer,...distractors])};
+});
+}
+function scoreCards(container,active){
+container.replaceChildren();container.style.setProperty('--teams',teams.length);
+teams.forEach((t,i)=>{
+const card=document.createElement('div');card.className='team'+(active===i?' active':'');
+const label=text('div',active===i?'▶ Tu turno':'','turn-label');
+const name=text('div',t.name,'team-name');name.style.color=colors[i];
+card.append(label,name,text('div',t.points+'','points'),text('div','puntos','hint'));container.append(card);
+});
+}
+function start(){
+const verbs=[...$('verbChecks').querySelectorAll('input:checked')].map(x=>x.value);
+if(!verbs.length){$('setupError').textContent='Selecciona al menos un verbo para jugar.';return;}
+$('setupError').textContent='';
+config={verbs,vos:$('vos').checked,mode:$('mode').value,count:Number($('length').value),time:Number($('time').value)};
+teams=[...$('names').querySelectorAll('input')].map((x,i)=>({name:x.value.trim()||'Equipo '+(i+1),points:0}));
+deck=buildDeck();index=0;correctCount=0;attempts=0;show('game');render();
+}
+$('start').onclick=start;
+function render(){
+stopClock();answered=false;revealed=false;paused=false;remaining=config.time;
+const q=deck[index];
+scoreCards($('scores'),index%teams.length);
+$('round').textContent='Pregunta '+(index+1)+' de '+deck.length;
+$('verbTag').textContent=q.v+' · '+meanings[q.v];
+$('bar').style.width=(index/deck.length*100)+'%';
+$('question').replaceChildren(document.createTextNode(q.s+' '),text('span','_____','blank'),document.createTextNode(' '+q.ending));
+$('instruction').textContent=config.mode==='choice'?'Conversa con tu equipo y elige la forma correcta.':'Digan la respuesta completa o escríbanla en una pizarrita. Después, revelen.';
+$('feedback').replaceChildren();$('judge').hidden=true;$('next').disabled=true;
+$('next').textContent=index===deck.length-1?'Ver resultados 🏆':'Siguiente turno →';
+$('options').replaceChildren();$('options').hidden=config.mode!=='choice';
+$('revealArea').hidden=config.mode!=='oral';
+if(config.mode==='choice'){
+q.choices.forEach((answer,i)=>{
+const b=document.createElement('button');b.className='option';
+b.append(text('span',String.fromCharCode(65+i),'letter'),text('span',answer));
+b.onclick=()=>choose(i);$('options').append(b);
+});
+}
+runClock();
+}
+function explanation(q){
+return q.s+' → '+pronouns[q.r]+' → '+q.answer;
+}
+function settle(ok){
+if(answered)return;
+answered=true;stopClock();attempts++;
+if(ok){teams[index%teams.length].points+=100;correctCount++;}
+scoreCards($('scores'),index%teams.length);
+$('next').disabled=false;$('judge').hidden=true;clockDisplay();
+}
+function choose(i){
+if(answered||config.mode!=='choice')return;
+const q=deck[index],ok=q.choices[i]===q.answer;
+settle(ok);
+[...$('options').children].forEach((b,j)=>{
+b.disabled=true;
+if(q.choices[j]===q.answer)b.classList.add('correct');
+else if(j===i)b.classList.add('wrong');
+});
+$('feedback').replaceChildren(text('strong',ok?'¡Muy bien! +100 puntos':'¡Seguimos aprendiendo!'),text('div',q.s+' '+q.answer+' '+q.ending),text('div',explanation(q),'hint'));
+}
+$('reveal').onclick=()=>{
+if(revealed||answered)return;
+revealed=true;stopClock();clockDisplay();$('revealArea').hidden=true;
+const q=deck[index];
+$('feedback').replaceChildren(text('div',q.s+' '+q.answer+' '+q.ending,'answer'),text('div',explanation(q),'hint'));
+$('judge').hidden=false;
+};
+function judge(ok){
+if(!revealed||answered)return;
+settle(ok);$('feedback').append(text('div',ok?'¡Muy bien! +100 puntos':'¡Buen intento! Practiquemos la forma correcta.'));
+}
+$('right').onclick=()=>judge(true);$('wrong').onclick=()=>judge(false);
+$('next').onclick=()=>{
+if(!answered)return;
+index++;if(index>=deck.length)finish();else render();
+};
+function finish(){
+stopClock();show('results');
+const max=Math.max(...teams.map(x=>x.points)),winners=teams.filter(x=>x.points===max);
+$('resultTitle').textContent=teams.length===1?'¡Reto completado!':winners.length>1?'¡Empate!':'¡Gana '+winners[0].name+'!';
+$('summary').textContent=correctCount+' aciertos de '+attempts+' respuestas evaluadas.'+(winners.length>1&&teams.length>1?' Equipos empatados: '+winners.map(x=>x.name).join(', ')+'.':'');
+scoreCards($('finalScores'),-1);
+}
+$('again').onclick=()=>{teams.forEach(x=>x.points=0);deck=buildDeck();index=0;correctCount=0;attempts=0;show('game');render();};
+$('settings').onclick=()=>show('setup');
+$('exit').onclick=()=>{exitPaused=paused;paused=true;runClock();$('exitDialog').showModal();};
+$('cancelExit').onclick=()=>$('exitDialog').close();
+$('confirmExit').onclick=()=>{finish();$('exitDialog').close();};
+$('exitDialog').addEventListener('close',()=>{if(!$('game').hidden){paused=exitPaused;runClock();}});
+function chart(){
+$('chart').replaceChildren();
+for(let r=0;r<6;r++){
+if(r===4&&!$('vos').checked)continue;
+const tr=document.createElement('tr');tr.append(text('td',pronouns[r]));
+Object.keys(forms).forEach(v=>tr.append(text('td',forms[v][r])));$('chart').append(tr);
+}}
+$('review').onclick=()=>{
+reviewPaused=paused;if(!$('game').hidden){paused=true;runClock();}
+chart();$('reviewDialog').showModal();
+};
+$('closeReview').onclick=()=>$('reviewDialog').close();
+$('reviewDialog').addEventListener('close',()=>{if(!$('game').hidden){paused=reviewPaused;runClock();}});
+$('fullscreen').onclick=async()=>{
+try{
+if(document.fullscreenElement)await document.exitFullscreen();
+else if(document.documentElement.requestFullscreen)await document.documentElement.requestFullscreen();
+else throw new Error();
+}catch(e){$('systemNote').textContent='Si la vista no permite pantalla completa, amplía la vista previa o usa la opción de pantalla completa de tu navegador.';}
+};
+document.addEventListener('fullscreenchange',()=>{$('fullscreen').textContent=document.fullscreenElement?'⛶ Salir de pantalla completa':'⛶ Pantalla completa';});
+document.addEventListener('keydown',e=>{
+if($('game').hidden||$('reviewDialog').open||$('exitDialog').open||/INPUT|SELECT|TEXTAREA|BUTTON/.test(document.activeElement.tagName))return;
+if(['1','2','3','4'].includes(e.key)&&config.mode==='choice'){e.preventDefault();choose(Number(e.key)-1);}
+if(e.key==='Enter'&&answered){e.preventDefault();$('next').click();}
+});
+})();
+</script>
+</body>
+</html>
